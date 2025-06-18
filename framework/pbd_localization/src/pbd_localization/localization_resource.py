@@ -61,24 +61,24 @@ class LocalizationResource:
         
 
     _registry: ClassVar[Dict[str, Type["LocalizationResource"]]] = {}
-    _public_registry: ClassVar[Dict[str, Type["LocalizationResource"]]] = {}
+    _public_registry: ClassVar[List[str]] = []
     texts: ClassVar[Dict[str, Dict]] = {}
     resource_name: ClassVar[str] = ""
     _default_lang: str = "en"
-    is_public: ClassVar[bool] = True
+    is_public: ClassVar[bool] = False
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         cls._validate_resource()
 
         if cls.resource_name:
-            if cls.resource_name in cls._registry:
+            if cls.resource_name in LocalizationResource._registry:
                 raise ResourceNameDuplicateException(
                     cls.resource_name, LocalizationResource._registry[cls.resource_name]
                 )
             LocalizationResource._registry[cls.resource_name] = cls
             if cls.is_public:
-                LocalizationResource._public_registry[cls.resource_name] = cls
+                LocalizationResource._public_registry.append(cls.resource_name)
             cls._flatten_texts()
 
     @classmethod
@@ -86,12 +86,21 @@ class LocalizationResource:
         """获取指定路径的本地化文本"""
 
         texts = LocalizationResource._get_texts(code)
-
-        # 先从指定语言获取，如果不存在
+        # 先从指定语言获取
         result = texts.get(key, None)
-
         if result is not None:
             return result
+        
+        # 尝试从公共资源获取
+        # 先将第一个点前面部分去除,然后补上公共资源名称，在公共资源_public_registry中查找
+        pos = key.find(".")
+        if pos > 0:
+            for name in LocalizationResource._public_registry:
+                public_key = f"{name}{key[pos:]}"
+                result = texts.get(public_key, None)
+                if result is not None:
+                    return result
+        
 
         # 如果有默认值，返回默认值
         if default is not None:
@@ -129,17 +138,17 @@ class LocalizationResource:
     def _flatten_texts(cls) -> None:
         """将嵌套文本转换为扁平化结构"""
         if not hasattr(cls, "texts") or not isinstance(cls.texts, dict):
-            return {}
+            raise InvalidTextsFormatException(cls.__name__)
 
-        flat_texts = {}
         resousce_name = cls.resource_name
 
         for lang, translations in cls.texts.items():
+            if lang not in LocalizationResource.texts :
+                LocalizationResource.texts[lang] = {}
             # 验证语言代码
-            if not isinstance(lang, str) or not lang:
-                raise InvalidLanguageFormatException(cls.__name__, lang)
+            if not isinstance(lang, str) or not lang or not isinstance(translations, dict):
+                raise InvalidLanguageFormatException(cls.__name__)
 
             # 扁平化处理
-            flat_texts[lang] = DictHelper.flatten(translations, resousce_name)
-
-        LocalizationResource.texts.update(flat_texts)
+            flat_texts = DictHelper.flatten(translations, resousce_name)
+            LocalizationResource.texts[lang] = {**LocalizationResource.texts[lang], **flat_texts}

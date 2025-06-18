@@ -34,7 +34,7 @@ class InvalidLanguageFormatException(InternalException):
     def __init__(self, cls_name: str):
         code = 'Invalid language format '
         data = {"class": cls_name}
-        message = f"{cls_name} 的 texts 格式不正确，应为 {'语言代码': {'键': '翻译'}}"
+        message = f"{cls_name} 的 texts 格式不正确，应为 {{'语言代码': {{'键': '翻译'}}}}"
         super().__init__(message,code=code, data=data)
 
 class InvalidDefaultLanguageException(InternalException):
