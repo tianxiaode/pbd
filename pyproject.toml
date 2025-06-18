@@ -23,6 +23,7 @@ Issues = "https://github.com/tianxiaode/pbd/issues"
 
 [dependency-groups]
 dev = [
+    "cryptography>=45.0.4",
     "logging-utilities>=5.0.0",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",

@@ -1,7 +1,6 @@
-from pbd_core import PbdException
+from pbd_core import BusinessException
 
-class PbdAuthenticationError(PbdException):
+class PbdAuthenticationError(BusinessException):
 
-    def __init__(self, data: dict):
-        code = "app.authentication_error"
-        super().__init__(code,code=code, data=data)
+    def __init__(self, message:str, code: str, data: dict):
+        super().__init__(message,code=code, data=data)
