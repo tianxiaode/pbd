@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from pbd_di import IDependencyBase
-from pbd_localization import Localizable, NotDependencyBaseSubclassException, ILocalizer
+from pbd_localization import Localizable,  ILocalizer
+from pbd_di import NotDependencyBaseSubclassException
 
 class TestLocalizable(unittest.TestCase):
 

@@ -4,7 +4,7 @@ from .generic import SINGLETON, TRANSIENT, SCOPED, VALID_SCOPES, TDependency
 from .interfaces import IDependencyBase, ISingletonDependency, ITransientDependency, IScopedDependency, IServiceProvider, IReplaceableInterface
 from .service_provider import ServiceProvider
 from .decorators import injectable_extension 
-from .exceptions import CircularDependencyException, InvalidScopeException, DependencyNotFoundException, InjectableExtensionInvalidTypeException
+from .exceptions import CircularDependencyException, InvalidScopeException, DependencyNotFoundException, InjectableExtensionInvalidTypeException,NotDependencyBaseSubclassException
 
 __all__ = [
     # container
@@ -29,6 +29,6 @@ __all__ = [
 
     # exceptions
     "CircularDependencyException", "InvalidScopeException", "DependencyNotFoundException",
-    "InjectableExtensionInvalidTypeException",
+    "InjectableExtensionInvalidTypeException", "NotDependencyBaseSubclassException",
     
 ]

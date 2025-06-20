@@ -31,3 +31,11 @@ class InjectableExtensionInvalidTypeException(InternalException):
         data = {'target': target.__name__}
         message = f"Injectable extension {target.__name__} 必须是类"
         super().__init__(message, code=code, data=data)
+
+class NotDependencyBaseSubclassException(InternalException):
+
+    def __init__(self, target: type):
+        code = 'Not dependency base subclass '
+        data = {"target": target.__name__}
+        message = f"目标类 {target.__name__} 必须是IependencyBase的的子类"
+        super().__init__(message,code=code, data=data)

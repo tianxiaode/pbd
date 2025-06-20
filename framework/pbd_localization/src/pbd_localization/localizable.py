@@ -1,7 +1,6 @@
 from typing import Any, Optional, Protocol, Type, runtime_checkable
-from pbd_di import IDependencyBase
+from pbd_di import IDependencyBase, NotDependencyBaseSubclassException
 from .interfaces import ILocalizer
-from .exceptions import NotDependencyBaseSubclassException
 
 @runtime_checkable
 class ILocalizableSupport(Protocol):
