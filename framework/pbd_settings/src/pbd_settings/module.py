@@ -1,8 +1,10 @@
 from pbd_core import PbdModuleBase
+from pbd_security import SecurityModule
 from .options import PbdSettingOptions
 from .value_providers import DefaultValueSettingValueProvider, GlobalSettingsValueProvider, JsonSettingsValueProvider, UserSettingsValueProvider
 
 class SettingsModule(PbdModuleBase):
+     _deps=[SecurityModule]
 
      async def configure(self):
           PbdSettingOptions.add_value_provider(DefaultValueSettingValueProvider)
