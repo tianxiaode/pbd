@@ -38,7 +38,7 @@ class PathHelper:
             ]
             
             for path in candidates:
-                if (path / "src").exists() or (path / "requirements.txt").exists():
+                if (path / "src").exists() or (path / "requirements.txt").exists() or (path / "pyproject.toml").exists():
                     self.set_root(path)
                     break
             else:

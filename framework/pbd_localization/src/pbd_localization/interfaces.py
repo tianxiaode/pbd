@@ -1,46 +1,48 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Union
+from pbd_core import AsyncHelper
 from pbd_di import ITransientDependency,IReplaceableInterface
 from .generic import CultureInfo
 
 class ICultureStore(ITransientDependency, IReplaceableInterface, ABC):
     """文化配置存储抽象接口"""
     @abstractmethod
-    def get_all(self) -> Dict[str, 'CultureInfo']:
+    async def get_all(self) -> Dict[str, 'CultureInfo']:
         pass
     
     @abstractmethod
-    def get(self, code: str) -> Optional['CultureInfo']:
+    async def get(self, code: str) -> Optional['CultureInfo']:
         pass
     
     @abstractmethod
-    def add(self, culture: 'CultureInfo') -> None:
+    async def add(self, culture: 'CultureInfo') -> None:
         pass
     
     @abstractmethod
-    def remove(self, code: str) -> bool:
+    async def remove(self, code: str) -> bool:
         pass
     
     @abstractmethod
-    def set_default(self, code: str) -> None:
+    async def set_default(self, code: str) -> None:
         pass
     
     @abstractmethod
-    def get_default(self) -> Optional['CultureInfo']:
+    async def get_default(self) -> Optional['CultureInfo']:
         pass
 
     @abstractmethod
-    def has(self) -> bool:
+    async def has(self) -> bool:
         pass
 
 
 
 class ILocalizer(ITransientDependency,IReplaceableInterface,ABC):
 
-    def set_current_lang(self, lang: str) -> None:
+    async def set_current_lang(self, lang: str) -> None:
         """设置当前语言"""
         self._current_lang = lang
+        AsyncHelper.completed()
 
     @property
     def current_lang(self) -> str:
@@ -48,7 +50,7 @@ class ILocalizer(ITransientDependency,IReplaceableInterface,ABC):
         return self._current_lang
 
     @abstractmethod
-    def get(self, keys: Union[str, List[str]],default: Optional[str] = None) -> str:
+    async def get(self, keys: Union[str, List[str]],default: Optional[str] = None) -> str:
         """获取本地化字符串"""
         pass
 

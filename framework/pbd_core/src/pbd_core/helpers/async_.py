@@ -3,7 +3,7 @@ from typing import Awaitable, Callable, TypeVar
 
 T = TypeVar('T')
 
-class AsyncUtils:
+class AsyncHelper:
     """异步工具集，用于统一接口"""
     _none_cache = None
     

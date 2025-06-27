@@ -1,7 +1,7 @@
 import os
 import json
 import threading
-from pbd_core import find_project_root
+from pbd_core import PathHelper
 from .interfaces import IJsonSettingStore
 from .schema import SettingDefinition
 
@@ -35,7 +35,7 @@ class JsonSettingStore(IJsonSettingStore):
                 self._loaded = True
 
     def get_config_file_path(self):
-        project_root = find_project_root()
+        project_root = PathHelper.get_root()
         config_file = project_root / 'config' / f'{self._env}.json'
 
         if not config_file.exists():

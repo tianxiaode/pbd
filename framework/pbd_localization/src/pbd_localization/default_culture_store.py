@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+from pbd_core import AsyncHelper
 from .interfaces import ICultureStore , CultureInfo
 from .default_culture import DefaultCulture
 
@@ -12,31 +13,34 @@ class DefaultCultureStore(ICultureStore):
     def initialize(self):
         self._data = DefaultCulture()
     
-    def get_all(self)-> Dict[str, 'CultureInfo']:
+    async def get_all(self)-> Dict[str, 'CultureInfo']:
         """获取所有文化配置"""
-        return self._data.get_all()
+        return AsyncHelper.result(self._data.get_all())
     
-    def get(self, code: str) -> Optional[CultureInfo]:
+    async def get(self, code: str) -> Optional[CultureInfo]:
         """获取指定语言代码的文化配置"""
-        return self._data.get(code)
+        return AsyncHelper.result(self._data.get(code))
     
-    def add(self, data: CultureInfo):
+    async def add(self, data: CultureInfo):
         """添加或更新文化配置"""
         self._data.add(data)
+        AsyncHelper.completed()
     
-    def remove(self, code: str):
+    async def remove(self, code: str):
         """删除指定语言代码的文化配置"""
         self._data.remove(code)
+        AsyncHelper.completed()
     
-    def set_default(self, code: str):
+    async def set_default(self, code: str):
         """设置默认文化配置"""
         self._data.set_default(code)
+        AsyncHelper.completed()
     
-    def get_default(self)-> Optional[CultureInfo]:
+    async def get_default(self)-> Optional[CultureInfo]:
         """获取默认文化配置"""
-        return self._data.get_default()
+        return AsyncHelper.result(self._data.get_default())
     
-    def has(self)-> bool:
+    async def has(self)-> bool:
         """检查是否有文化配置"""
-        return bool(self._data.get_all())
+        return AsyncHelper.result(bool(self._data.get_all()))
         

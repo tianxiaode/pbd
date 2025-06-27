@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+from pbd_core import AsyncHelper
 from .interfaces import ILocalizer
 from .localization_resource import LocalizationResource
 
@@ -10,11 +11,11 @@ class DefaultLocalizer(ILocalizer):
     未来可通过替换该类实现数据库或其他方式获取本地化字符串
     """
 
-    def get(self, path: Union[str, List[str]], default: Optional[str] = None) -> str:
+    async def get(self, path: Union[str, List[str]], default: Optional[str] = None) -> str:
         """
         获取本地化字符串
         :param keys: 字符串或字符串列表
         :param default: 默认值
         :return: 本地化字符串
         """
-        return LocalizationResource.get(path, self.current_lang, default)
+        return AsyncHelper.result(LocalizationResource.get(path, self.current_lang, default))

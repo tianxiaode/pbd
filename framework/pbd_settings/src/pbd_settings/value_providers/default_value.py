@@ -1,3 +1,4 @@
+from typing import Any
 from .base import SettingValueProviderBase, SettingDefinition
 from ..interfaces import IJsonSettingStore
 
@@ -10,10 +11,10 @@ class DefaultValueSettingValueProvider(SettingValueProviderBase):
         self._store = self.get_dependency(IJsonSettingStore)
 
 
-    async def get(self, setting: SettingDefinition, **kwargs) -> any:
+    async def get(self, setting: SettingDefinition, **kwargs) -> Any:
         """获取配置值"""
         return self._store.get(setting)
 
-    async def get_all(self, settings: list[SettingDefinition], **kwargs) -> dict[str, any]:
+    async def get_all(self, settings: list[SettingDefinition], **kwargs) -> dict[str, Any]:
         """获取所有配置值"""
         return self._store.get_all(settings)
