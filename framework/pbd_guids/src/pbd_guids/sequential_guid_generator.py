@@ -1,18 +1,20 @@
+import asyncio
 import os
 import uuid
 import time
 from threading import Lock
+from pbd_core import AsyncHelper
 from .interfaces import IGuidGenerator
 
 class SequentialGuidGenerator(IGuidGenerator):
     """可靠的16字节GUID生成器，避免重复"""
-    _lock = Lock()
+    _lock = asyncio.Lock()
     _last_timestamp = 0
     _sequence = 0
 
-    def create(self) -> uuid.UUID:
+    async def create(self) -> uuid.UUID:
         """生成严格16字节的UUID"""
-        with self._lock:
+        async with self._lock:
             # 使用更高精度的时间（微秒级）
             current_time = time.time_ns() // 1000
             if current_time < self._last_timestamp:
@@ -41,7 +43,7 @@ class SequentialGuidGenerator(IGuidGenerator):
             guid_bytes[8:16] = random_bytes
 
 
-            return uuid.UUID(bytes=bytes(guid_bytes))
+            return await AsyncHelper.result(uuid.UUID(bytes=bytes(guid_bytes)))
 
 
 

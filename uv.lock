@@ -358,12 +358,14 @@ source = { editable = "framework/pbd_settings" }
 dependencies = [
     { name = "pbd-core" },
     { name = "pbd-di" },
+    { name = "pbd-security" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "pbd-core", editable = "framework/pbd_core" },
     { name = "pbd-di", editable = "framework/pbd_di" },
+    { name = "pbd-security", editable = "framework/pbd_security" },
 ]
 
 [[package]]

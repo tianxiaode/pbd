@@ -13,7 +13,7 @@ class IGuidGenerator(ISingletonDependency, IReplaceableInterface):
 
 
     @abstractmethod
-    def create(self,**kwargs) -> UUID:
+    async def create(self,**kwargs) -> UUID:
         """生成一个新的GUID
 
         Returns:
