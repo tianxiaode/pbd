@@ -21,4 +21,3 @@ packages = ["src/pbd_di"]
 
 [tool.uv.sources]
 pbd-core = { workspace = true }
-pbd-di = { workspace = true }

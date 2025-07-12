@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 from typing import Type
-from pbd_di import ServiceProvider
+from pbd_di.service_provider import ServiceProvider
 
 class TestServiceProvider(unittest.IsolatedAsyncioTestCase):
 
