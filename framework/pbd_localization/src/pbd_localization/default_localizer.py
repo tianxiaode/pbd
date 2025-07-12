@@ -18,4 +18,4 @@ class DefaultLocalizer(ILocalizer):
         :param default: 默认值
         :return: 本地化字符串
         """
-        return AsyncHelper.result(LocalizationResource.get(path, self.current_lang, default))
+        return await AsyncHelper.result(LocalizationResource.get(path, self.current_lang, default))

@@ -42,7 +42,7 @@ class ILocalizer(ITransientDependency,IReplaceableInterface,ABC):
     async def set_current_lang(self, lang: str) -> None:
         """设置当前语言"""
         self._current_lang = lang
-        AsyncHelper.completed()
+        await AsyncHelper.completed()
 
     @property
     def current_lang(self) -> str:

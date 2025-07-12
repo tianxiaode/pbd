@@ -4,7 +4,7 @@ from unittest.mock import patch
 from pbd_core import AsyncHelper
 from typing import Any
 
-class TestAsyncHelper(unittest.TestCase):
+class TestAsyncHelper(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         # 重置 _none_cache 以确保测试独立性
         AsyncHelper._none_cache = None
@@ -124,6 +124,8 @@ class TestAsyncHelper(unittest.TestCase):
             return a * b
         fut5 = AsyncHelper.run_in_executor(sync_mul, 5, 6)
         self.assertEqual(await fut5, 30)
+        return None  # 显式返回None
+
 
 if __name__ == '__main__':
     unittest.main()
