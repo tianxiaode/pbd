@@ -65,7 +65,6 @@ class IDependencyBase(HasLogger):
             return getattr(self, name)
         raise DependencyNotFoundException(dependency_type)
     
-    
 class ISingletonDependency(IDependencyBase):
     _di_scope = SINGLETON
 
@@ -75,11 +74,4 @@ class ITransientDependency(IDependencyBase):
 class IScopedDependency(IDependencyBase):
     _di_scope = SCOPED
 
-class IServiceProvider(ITransientDependency,IReplaceableInterface, ABC):
-    """服务提供者接口 (类似 .NET 的 IServiceProvider)"""
-
-    @abstractmethod
-    async def get(self, service_type: Type) -> Any:
-        """获取指定类型的服务实例"""
-        raise NotImplementedError()
    

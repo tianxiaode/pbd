@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from pbd_di import IDependencyBase, ISingletonDependency, ITransientDependency, IScopedDependency,IReplaceableInterface, IServiceProvider, DependencyNotFoundException
+from pbd_di import IDependencyBase, ISingletonDependency, ITransientDependency, IScopedDependency,IReplaceableInterface, DependencyNotFoundException
 
 class TestIReplaceableInterface(unittest.TestCase):
     def test_is_interface_direct_inheritance(self):
@@ -44,16 +44,6 @@ class TestIReplaceableInterface(unittest.TestCase):
         self.assertEqual(IUserRepository.__di_implementation__, UserRepository)
 
 
-
-class TestIServiceProvider(unittest.TestCase):
-    def test_get_service_abstractmethod(self):
-        with self.assertRaises(TypeError):
-            class Derived(IServiceProvider):
-                pass
-
-            Derived()
-
-        
 
 class TestDependencyBase(unittest.TestCase):
     def test_init_subclass_inherits_dependencies(self):

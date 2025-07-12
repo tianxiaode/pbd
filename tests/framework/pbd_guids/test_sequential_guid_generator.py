@@ -1,8 +1,7 @@
 import unittest
 import uuid
 from unittest.mock import patch
-from pbd_guids import SequentialGuidGenerator
-import pytest
+from pbd_guids.sequential_guid_generator import SequentialGuidGenerator
 
 class TestSequentialGuidGenerator(unittest.IsolatedAsyncioTestCase):
 

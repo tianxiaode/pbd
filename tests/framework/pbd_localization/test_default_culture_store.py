@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from pbd_localization import DefaultCultureStore,CultureInfo
+from pbd_localization.default_culture_store import DefaultCultureStore,CultureInfo
 
 class TestDefaultCultureStore(unittest.IsolatedAsyncioTestCase):
     def setUp(self):

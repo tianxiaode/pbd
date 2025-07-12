@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from pbd_security import StringEncryptionService
+from pbd_security.security.encryption import StringEncryptionService
 
 class TestStringEncryptionService(unittest.TestCase):
     def setUp(self):

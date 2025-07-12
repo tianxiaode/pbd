@@ -2,7 +2,6 @@ import asyncio
 import os
 import uuid
 import time
-from threading import Lock
 from pbd_core import AsyncHelper
 from .interfaces import IGuidGenerator
 

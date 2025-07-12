@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from pbd_localization import DefaultLocalizer
+from pbd_localization.default_localizer import DefaultLocalizer
 
 class TestDefaultLocalizer(unittest.IsolatedAsyncioTestCase):
 

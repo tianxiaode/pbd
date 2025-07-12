@@ -1,6 +1,6 @@
 import threading
 import unittest
-from pbd_localization import DefaultCulture, CultureInfo
+from pbd_localization.default_culture import DefaultCulture, CultureInfo
 
 en_info = CultureInfo(language_code='en', display_name='English', name='English', country_code='US')
 fr_info = CultureInfo(language_code='fr', display_name='French', name='Français', country_code='FR')

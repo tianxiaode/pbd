@@ -1,9 +1,12 @@
 from .container import Container
 from .funcs import replace_service, get_default_dependency_name
 from .generic import SINGLETON, TRANSIENT, SCOPED, VALID_SCOPES, TDependency
-from .interfaces import IDependencyBase, ISingletonDependency, ITransientDependency, IScopedDependency, IServiceProvider, IReplaceableInterface
+from .interfaces import IDependencyBase, ISingletonDependency, ITransientDependency, IScopedDependency, IReplaceableInterface
 from .decorators import injectable_extension 
-from .exceptions import CircularDependencyException, InvalidScopeException, DependencyNotFoundException, InjectableExtensionInvalidTypeException,NotDependencyBaseSubclassException
+from .exceptions import CircularDependencyException, InvalidScopeException, DependencyNotFoundException, InjectableExtensionInvalidTypeException, NotDependencyBaseSubclassException
+
+# 导入扩展模块确保动态添加生效
+from . import extensions
 
 __all__ = [
     # container
@@ -15,15 +18,15 @@ __all__ = [
     # generic
     "SINGLETON", "TRANSIENT", "SCOPED", "VALID_SCOPES", "TDependency",
 
-    #interfaces
+    # interfaces
     "IDependencyBase", "ISingletonDependency",
     "ITransientDependency", "IScopedDependency",
-    "IServiceProvider", "IReplaceableInterface",
+    "IReplaceableInterface",
+    
     # decorators
     "injectable_extension",
 
     # exceptions
     "CircularDependencyException", "InvalidScopeException", "DependencyNotFoundException",
     "InjectableExtensionInvalidTypeException", "NotDependencyBaseSubclassException",
-    
 ]
