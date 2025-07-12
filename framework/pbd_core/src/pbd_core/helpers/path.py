@@ -36,13 +36,18 @@ class PathHelper:
                 Path(__file__).parent.parent,  # 从模块文件推断
                 Path(sys.argv[0]).parent  # 从执行文件推断
             ]
-            
+            tried_paths = []
             for path in candidates:
+                tried_paths.append(str(path))
                 if (path / "src").exists() or (path / "requirements.txt").exists() or (path / "pyproject.toml").exists():
                     self.set_root(path)
                     break
             else:
-                raise RuntimeError("项目根路径未设置且无法自动推断")
+                raise RuntimeError(
+                    "项目根路径未设置且无法自动推断\n"
+                    f"已尝试的路径: {tried_paths}\n"
+                    "请确保当前目录或脚本所在目录是项目根目录，或者显式调用PathHelper.set_root()"
+                )
         return self._root
     
     @classmethod

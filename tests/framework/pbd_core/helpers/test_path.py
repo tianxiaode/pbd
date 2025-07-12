@@ -56,16 +56,19 @@ class TestPathHelper(unittest.TestCase):
         # 测试自动推断（通过setUp创建的临时目录结构）
         PathHelper._root = None
         with patch('sys.argv', ['dummy_script.py']), \
-             patch('os.getcwd', return_value=str(self.root_path)):
+            patch('os.getcwd', return_value=str(self.root_path)):
             inferred_root = PathHelper.get_root()
             self.assertEqual(inferred_root, self.root_path.resolve())
         
-        # 测试无法推断的情况
+        # 测试无法推断的情况 - 使用模拟的虚拟路径
         PathHelper._root = None
         with patch('sys.argv', ['dummy_script.py']), \
-             patch('os.getcwd', return_value='/tmp'), \
-             self.assertRaises(RuntimeError):
+            patch('os.getcwd', return_value='/nonexistent/path'), \
+            patch('pathlib.Path.exists', return_value=False), \
+            self.assertRaises(RuntimeError):
             PathHelper.get_root()
+
+
     
     def test_get_src_data_config(self):
         """测试获取标准子目录"""

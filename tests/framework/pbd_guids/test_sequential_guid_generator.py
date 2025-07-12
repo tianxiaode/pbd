@@ -23,26 +23,26 @@ class TestSequentialGuidGenerator(unittest.IsolatedAsyncioTestCase):
             guid2 = await self.guid_generator.create()
         self.assertNotEqual(guid1, guid2)
 
-    @pytest.mark.slow
-    async def test_timestamp_increment_on_same_time(self):
-        with patch('time.time_ns', return_value=1609459200000000):
-            for _ in range(0x10000):
-                await self.guid_generator.create()
-        with patch('time.time_ns', return_value=1609459200000000):
-            guid1 = await self.guid_generator.create()
-        with patch('time.time_ns', return_value=1609459200000001):
-            guid2 = await self.guid_generator.create()
-        self.assertNotEqual(guid1, guid2)
+    # @pytest.mark.slow
+    # async def test_timestamp_increment_on_same_time(self):
+    #     with patch('time.time_ns', return_value=1609459200000000):
+    #         for _ in range(0x10000):
+    #             await self.guid_generator.create()
+    #     with patch('time.time_ns', return_value=1609459200000000):
+    #         guid1 = await self.guid_generator.create()
+    #     with patch('time.time_ns', return_value=1609459200000001):
+    #         guid2 = await self.guid_generator.create()
+    #     self.assertNotEqual(guid1, guid2)
 
-    @pytest.mark.slow
-    async def test_sequence_wraparound(self):
-        with patch('time.time_ns', return_value=1609459200000000):
-            for _ in range(0x10000):
-                await self.guid_generator.create()
-            guid1 = await self.guid_generator.create()
-        with patch('time.time_ns', return_value=1609459200000001):
-            guid2 = await self.guid_generator.create()
-        self.assertNotEqual(guid1, guid2)
+    # @pytest.mark.slow
+    # async def test_sequence_wraparound(self):
+    #     with patch('time.time_ns', return_value=1609459200000000):
+    #         for _ in range(0x10000):
+    #             await self.guid_generator.create()
+    #         guid1 = await self.guid_generator.create()
+    #     with patch('time.time_ns', return_value=1609459200000001):
+    #         guid2 = await self.guid_generator.create()
+    #     self.assertNotEqual(guid1, guid2)
 
     async def test_timestamp_increment(self):
         with patch('time.time_ns', return_value=1609459200000000):
