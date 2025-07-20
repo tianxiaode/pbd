@@ -1,5 +1,6 @@
-from typing import ClassVar, Dict, Optional, Union,Any, List
+from typing import ClassVar, Dict, Optional, Union, Any
 from pydantic import BaseModel, field_validator
+from .exceptions import SettingTypeError, SettingDuplicateError, SettingDefinitionError
 
 class SettingDefinition(BaseModel):
     name: str   
@@ -15,55 +16,54 @@ class SettingDefinition(BaseModel):
 
     @field_validator("type", mode='before')
     def normalize_type(cls, v):
-        # 如果传的是 Python 类型对象，如 int、str、bool，转换成字符串
         if isinstance(v, type):
             return v.__name__
         return v
-    
-class SettingGroup:
-    def __init__(self, name: str, children: List[Union['SettingGroup', SettingDefinition]]):
-        self.name = name
-        self.children = children
-
-    def flatten(self, parent_prefix="") -> List[tuple[str, SettingDefinition]]:
-        entries = []
-        prefix = f"{parent_prefix}.{self.name}" if parent_prefix else self.name
-        for child in self.children:
-            if isinstance(child, SettingDefinition):
-                entries.append((f"{prefix}.{child.name}", child))
-            elif isinstance(child, SettingGroup):
-                entries.extend(child.flatten(prefix))
-            else:
-                raise TypeError(f"不支持的子节点类型: {type(child)}")
-        return entries
 
 class SettingSchema:
-    settings: ClassVar[list[Union[SettingGroup, SettingDefinition]]] = []
+    settings: ClassVar[dict] = {}
+    _registry: ClassVar[Dict[str, SettingDefinition]] = {}
 
-    _registry: Dict[str, SettingDefinition] = {}
+    @staticmethod
+    def _is_setting_definition(d: dict) -> bool:
+        return 'type' in d  # 只要有type字段就认为是设置定义
+
+    @classmethod
+    def _create_setting_definition(cls, name: str, data: dict) -> SettingDefinition:
+        return SettingDefinition(name=name, **data)
+
+    @classmethod
+    def _process_settings_dict(cls, settings_dict: dict, parent_key: str = ""):
+        for key, value in settings_dict.items():
+            current_key = f"{parent_key}.{key}" if parent_key else key
+            
+            if isinstance(value, dict):
+                if cls._is_setting_definition(value):
+                    setting = cls._create_setting_definition(key, value)
+                    if current_key in cls._registry:
+                        raise SettingDuplicateError(current_key)
+                    setting.key = current_key
+                    cls._registry[current_key] = setting
+                else:
+                    cls._process_settings_dict(value, current_key)
+            else:
+                raise SettingDefinitionError(f"不支持的设置类型: {type(value)}")
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-
-        for item in cls.settings:
-            if isinstance(item, SettingGroup):
-                entries = item.flatten()
-            elif isinstance(item, SettingDefinition):
-                entries = [(item.name, item)]
-            else:
-                raise TypeError(f"不支持的设置类型: {type(item)}")
-
-            for key, setting in entries:
-                if key in SettingSchema._registry:
-                    raise ValueError(f"重复设置定义：{key}")
-                setting.key = key  # 💡 设置完整路径 key 到 setting
-                SettingSchema._registry[key] = setting
+        cls._process_settings_dict(cls.settings)
 
     @classmethod
-    def get_settings(cls) -> Dict[str, SettingDefinition]:
-        return dict(SettingSchema._registry)
+    def get_all_settings(cls) -> Dict[str, SettingDefinition]:
+        """获取所有已注册的设置(包括所有子类定义的设置)"""
+        return dict(cls._registry)
 
     @classmethod
     def get_setting(cls, name: str) -> Optional[SettingDefinition]:
-        return SettingSchema._registry.get(name)
+        """根据名称获取单个设置"""
+        return cls._registry.get(name)
 
+    @classmethod
+    def get_settings_by_prefix(cls, prefix: str) -> Dict[str, SettingDefinition]:
+        """根据前缀获取一组设置"""
+        return {k: v for k, v in cls._registry.items() if k.startswith(prefix)}

@@ -19,24 +19,27 @@ class LocalizationResource:
     
     示例：
     class CommonResources(LocalizationResource):
-        resource_name = "common"
         texts = {
             "en": {
-                "button": {
-                    "submit": "Submit",
-                    "cancel": "Cancel"
-                },
-                "header": {
-                    "welcome": "Welcome, {username}!"
+                "common": {
+                    "button": {
+                        "submit": "Submit",
+                        "cancel": "Cancel"
+                    },
+                    "header": {
+                        "welcome": "Welcome, {username}!"
+                    }
                 }
             },
             "zh-CN": {
-                "button": {
-                    "submit": "提交",
-                    "cancel": "取消"
-                },
-                "header": {
-                    "welcome": "欢迎, {username}!"
+                "common": {
+                    "button": {
+                        "submit": "提交",
+                        "cancel": "取消"
+                    },
+                    "header": {
+                        "welcome": "欢迎, {username}!"
+                    }
                 }
             }
         }
