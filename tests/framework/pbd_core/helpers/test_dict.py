@@ -81,6 +81,70 @@ class TestDictHelper(unittest.TestCase):
         input_dict = {'a': 1}
         self.assertIsNone(DictHelper.find_by_path(input_dict, ''))
 
+    def test_deep_clone_happy_path(self):
+        input_dict = {'a': 1, 'b': {'c': 2, 'd': {'e': 3}}, '__public__': True}
+        cloned = DictHelper.deep_clone(input_dict)
+        self.assertEqual(cloned, {'a': 1, 'b': {'c': 2, 'd': {'e': 3}}})
+        self.assertIsNot(cloned, input_dict)
+        self.assertIsNot(cloned['b'], input_dict['b'])
+
+    def test_deep_clone_empty_dict(self):
+        self.assertEqual(DictHelper.deep_clone({}), {})
+
+    def test_deep_clone_with_nested_empty_dict(self):
+        input_dict = {'a': {}, 'b': {'c': {}}}
+        cloned = DictHelper.deep_clone(input_dict)
+        self.assertEqual(cloned, {'a': {}, 'b': {'c': {}}})
+        self.assertIsNot(cloned['a'], input_dict['a'])
+
+    def test_deep_clone_with_non_dict_values(self):
+        input_dict = {'a': [1, 2], 'b': "string", 'c': 123}
+        cloned = DictHelper.deep_clone(input_dict)
+        self.assertEqual(cloned, {'a': [1, 2], 'b': "string", 'c': 123})
+        self.assertIs(cloned['a'], input_dict['a'])  # 列表是浅拷贝
+
+    def test_deep_clone_with_multiple_public_flags(self):
+        input_dict = {'__public__': True, 'a': {'__public__': False, 'b': 2}}
+        cloned = DictHelper.deep_clone(input_dict)
+        self.assertEqual(cloned, {'a': {'b': 2}})
+
+    def test_deep_merge_happy_path(self):
+        target = {'a': 1, 'b': {'c': 2}}
+        source = {'b': {'d': 3}, 'e': 4}
+        DictHelper.deep_merge(target, source)
+        self.assertEqual(target, {'a': 1, 'b': {'c': 2, 'd': 3}, 'e': 4})
+
+    def test_deep_merge_empty_source(self):
+        target = {'a': 1}
+        source = {}
+        DictHelper.deep_merge(target, source)
+        self.assertEqual(target, {'a': 1})
+
+    def test_deep_merge_empty_target(self):
+        target = {}
+        source = {'a': 1}
+        DictHelper.deep_merge(target, source)
+        self.assertEqual(target, {'a': 1})
+
+    def test_deep_merge_overwrite_values(self):
+        target = {'a': 1, 'b': {'c': 2}}
+        source = {'a': 10, 'b': {'c': 20}}
+        DictHelper.deep_merge(target, source)
+        self.assertEqual(target, {'a': 10, 'b': {'c': 20}})
+
+    def test_deep_merge_nested_dicts(self):
+        target = {'level1': {'level2': {'a': 1}}}
+        source = {'level1': {'level2': {'b': 2}, 'level3': 3}}
+        DictHelper.deep_merge(target, source)
+        expected = {'level1': {'level2': {'a': 1, 'b': 2}, 'level3': 3}}
+        self.assertEqual(target, expected)
+
+    def test_deep_merge_with_non_dict_values(self):
+        target = {'a': {'b': 1}}
+        source = {'a': 2}  # a从字典变为非字典值
+        DictHelper.deep_merge(target, source)
+        self.assertEqual(target, {'a': 2})
+
 
 if __name__ == '__main__':
     unittest.main()

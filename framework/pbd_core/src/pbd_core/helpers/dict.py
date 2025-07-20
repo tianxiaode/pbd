@@ -25,18 +25,30 @@ class DictHelper:
             return None
             
         keys = path.split(sep)
-            
         current = source
         
-        # 处理前n-1个keys，必须都是字典
-        for key in keys[:-1]:
+        for key in keys:
             if not isinstance(current, dict) or key not in current:
                 return None
             current = current[key]
         
-        # 处理最后一个key
-        if isinstance(current, dict) and keys[-1] in current:
-            return current[keys[-1]]
-        return None
+        return current
 
-
+    @classmethod
+    def deep_clone(self,source: Dict) -> Dict:
+        """深度拷贝字典并移除标记"""
+        return {
+            k: DictHelper.deep_clone(v) if isinstance(v, dict) else v
+            for k, v in source.items()
+            if k != '__public__'
+        }
+    
+    @classmethod 
+    def deep_merge(self,target: Dict, source: Dict):
+        """递归合并字典"""
+        for k, v in source.items():
+            if isinstance(v, dict):
+                node = target.setdefault(k, {})
+                DictHelper.deep_merge(node, v)
+            else:
+                target[k] = v

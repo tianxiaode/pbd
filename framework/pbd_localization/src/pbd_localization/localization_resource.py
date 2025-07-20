@@ -1,10 +1,8 @@
-from typing import Dict, ClassVar, List, Type, Any, Union
+from typing import Dict, ClassVar,  Set,  Any
+import copy
 from pbd_core import DictHelper
 from .exceptions import (
-    ResourceNameDuplicateException,
     EmptyResourceNameException,
-    InvalidTextsFormatException,
-    InvalidLanguageFormatException,
     InvalidDefaultLanguageException,
 )
 
@@ -22,6 +20,7 @@ class LocalizationResource:
         texts = {
             "en": {
                 "common": {
+                    "__public__": True, # 标记为公共资源
                     "button": {
                         "submit": "Submit",
                         "cancel": "Cancel"
@@ -44,74 +43,76 @@ class LocalizationResource:
             }
         }
         
-    内部扁平化存储：
-    {
-        "en": {
-            "common.button.submit": "Submit",
-            "common.button.cancel": "Cancel",
-            "common.header.welcome": "Welcome, {username}!"
-        },
-        "zh-CN": {
-            "common.button.submit": "提交",
-            "common.button.cancel": "取消",
-            "common.header.welcome": "欢迎, {username}!"
-        }
-    }
     
     查询示例：
     LocalizationResource.get("common.button.submit", "zh-CN")
     """
         
-
-    _registry: ClassVar[Dict[str, Type["LocalizationResource"]]] = {}
-    _public_registry: ClassVar[List[str]] = []
-    texts: ClassVar[Dict[str, Dict]] = {}
-    resource_name: ClassVar[str] = ""
-    _default_lang: str = "en"
-    is_public: ClassVar[bool] = False
+    _public_roots: ClassVar[Set[str]] = set()  # 基准语言公共根
+    resources: ClassVar[Dict[str, Dict]] = {}
+    _default_lang: ClassVar[str] = "en"
+    _text_store: ClassVar[Dict[str, Dict]] = {}
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls._validate_resource()
-
-        if cls.resource_name:
-            if cls.resource_name in LocalizationResource._registry:
-                raise ResourceNameDuplicateException(
-                    cls.resource_name, LocalizationResource._registry[cls.resource_name]
-                )
-            LocalizationResource._registry[cls.resource_name] = cls
-            if cls.is_public:
-                LocalizationResource._public_registry.append(cls.resource_name)
-            cls._flatten_texts()
+        cls._integrate_resources()
 
     @classmethod
-    def get(cls, key: str, code: str, default: Any = None) -> Any:
+    def _integrate_resources(cls):
+        """整合资源并提取公共根标记"""
+        for lang, lang_data in cls.resources.items():
+            # 深度拷贝避免修改原始数据
+            processed = DictHelper.deep_clone(lang_data)
+            
+            # 扫描第一层键
+            for key in list(processed.keys()):
+                if isinstance(processed[key], dict):
+                    # 提取公共根标记
+                    if processed[key].pop('__public__', False):
+                        cls._public_roots.add(key)
+                        
+            # 合并到存储
+            DictHelper.deep_merge(cls._text_store.setdefault(lang, {}), processed)
+
+    @classmethod
+    def get_full_pack(cls, lang: str) -> Dict:
+        """获取完整嵌套结构"""
+        return cls._text_store.get(lang, {})
+    
+    @classmethod
+    def get_public_roots(cls) -> Set[str]:
+        """获取公共根集合"""
+        return cls._public_roots.copy()    
+
+    @classmethod
+    def get(cls, path: str, lang: str, default: Any = None) -> Any:
         """获取指定路径的本地化文本"""
 
-        texts = LocalizationResource._get_texts(code)
-        # 先从指定语言获取
-        result = texts.get(key, None)
-        if result is not None:
+        def find_in(lang: str):
+            """多阶段查询函数"""
+            # 阶段1：精确匹配
+            if (val := DictHelper.find_by_path(cls._text_store.get(lang, {}), path)) is not None:
+                return val
+                
+            # 阶段2：公共推导
+            if '.' in path:
+                _, _, suffix = path.partition('.')
+                for root in cls._public_roots:
+                    if (val := DictHelper.find_by_path(cls._text_store.get(lang, {}), f"{root}.{suffix}")) is not None:
+                        return val
+            return None
+        
+
+       # 主语言查询
+        if (result := find_in(lang)) is not None:
             return result
+            
+        # 默认语言回退
+        if lang != cls._default_lang:
+            if (result := find_in(cls._default_lang)) is not None:
+                return result
         
-        # 尝试从公共资源获取
-        # 先将第一个点前面部分去除,然后补上公共资源名称，在公共资源_public_registry中查找
-        pos = key.find(".")
-        if pos > 0:
-            for name in LocalizationResource._public_registry:
-                public_key = f"{name}{key[pos:]}"
-                result = texts.get(public_key, None)
-                if result is not None:
-                    return result
-        
-
-        # 如果有默认值，返回默认值
-        if default is not None:
-            return default
-
-        default_texts = LocalizationResource._get_texts(LocalizationResource.get_default_lang())
-        return default_texts.get(key, None)
-
+        return default
 
     @classmethod
     def get_default_lang(cls) -> str:
@@ -126,32 +127,9 @@ class LocalizationResource:
         LocalizationResource._default_lang = lang
 
     @classmethod
-    def _get_texts(cls, code: str) -> Dict:
+    def get_all(cls, lang: str) -> Dict:
         """获取指定资源名称的本地化文本"""
-        return LocalizationResource.texts.get(code, {})
-
-    @classmethod
-    def _validate_resource(cls):
-        """验证资源类配置"""
-        if not cls.resource_name:
-            raise EmptyResourceNameException(cls.__name__)
+        return copy.deepcopy(cls._text_store.get(lang, {}))
 
 
-    @classmethod
-    def _flatten_texts(cls) -> None:
-        """将嵌套文本转换为扁平化结构"""
-        if not hasattr(cls, "texts") or not isinstance(cls.texts, dict):
-            raise InvalidTextsFormatException(cls.__name__)
 
-        resousce_name = cls.resource_name
-
-        for lang, translations in cls.texts.items():
-            if lang not in LocalizationResource.texts :
-                LocalizationResource.texts[lang] = {}
-            # 验证语言代码
-            if not isinstance(lang, str) or not lang or not isinstance(translations, dict):
-                raise InvalidLanguageFormatException(cls.__name__)
-
-            # 扁平化处理
-            flat_texts = DictHelper.flatten(translations, resousce_name)
-            LocalizationResource.texts[lang] = {**LocalizationResource.texts[lang], **flat_texts}
