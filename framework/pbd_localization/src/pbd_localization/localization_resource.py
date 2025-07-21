@@ -2,7 +2,7 @@ from typing import Dict, ClassVar,  Set,  Any
 import copy
 from pbd_core import DictHelper
 from .exceptions import (
-    EmptyResourceNameException,
+    InvalidResourceFormatException,
     InvalidDefaultLanguageException,
 )
 
@@ -20,7 +20,7 @@ class LocalizationResource:
         texts = {
             "en": {
                 "common": {
-                    "__public__": True, # 标记为公共资源
+                    "_public": True, # 标记为公共资源
                     "button": {
                         "submit": "Submit",
                         "cancel": "Cancel"
@@ -60,15 +60,18 @@ class LocalizationResource:
     @classmethod
     def _integrate_resources(cls):
         """整合资源并提取公共根标记"""
+
+        if not isinstance(cls.resources, dict):
+            raise InvalidResourceFormatException(cls.__name__)
+        
         for lang, lang_data in cls.resources.items():
             # 深度拷贝避免修改原始数据
             processed = DictHelper.deep_clone(lang_data)
-            
             # 扫描第一层键
             for key in list(processed.keys()):
                 if isinstance(processed[key], dict):
                     # 提取公共根标记
-                    if processed[key].pop('__public__', False):
+                    if processed[key].pop('_public', False):
                         cls._public_roots.add(key)
                         
             # 合并到存储
@@ -130,6 +133,5 @@ class LocalizationResource:
     def get_all(cls, lang: str) -> Dict:
         """获取指定资源名称的本地化文本"""
         return copy.deepcopy(cls._text_store.get(lang, {}))
-
 
 
